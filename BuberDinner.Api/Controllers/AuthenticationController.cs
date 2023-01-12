@@ -1,4 +1,4 @@
-﻿using BuberDinner.Application.Services.Authentication;
+using BuberDinner.Application.Services.Authentication;
 using BuberDinner.Contract.Authentication;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,10 +31,10 @@ public class AuthenticationController : ControllerBase
 
         // Map services response to http response. (The Laravel equivalent is API resources)
         var authResponse = new AuthenticationResponse(
-            authResult.Id,
-            authResult.FirstName,
-            authResult.LastName,
-            authResult.Email,
+            authResult.User.Id,
+            authResult.User.FirstName,
+            authResult.User.LastName,
+            authResult.User.Email,
             authResult.Token
         );
 
@@ -51,10 +51,10 @@ public class AuthenticationController : ControllerBase
 
         // Map to API response
         var authResponse = new AuthenticationResponse(
-            authResult.Id,
-            authResult.FirstName,
-            authResult.LastName,
-            authResult.Email,
+            authResult.User.Id,
+            authResult.User.FirstName,
+            authResult.User.LastName,
+            authResult.User.Email,
             authResult.Token
         );
 

@@ -33,14 +33,11 @@ public class AuthenticationService : IAuthenticationService
         }
         
         // Create the JWT Token
-        var token = jwtTokenGenerator.GenerateToken(user.Id, user.FirstName, user.LastName);
+        var token = jwtTokenGenerator.GenerateToken(user);
         
         return new AuthenticationResult()
         {
-            Id = user.Id,
-            FirstName = user.FirstName,
-            LastName = user.LastName,
-            Email = user.Email,
+            User = user,
             Token = token
         };
     }
@@ -68,14 +65,11 @@ public class AuthenticationService : IAuthenticationService
         userRepository.Add(user);
 
         // Create a JWT Token
-        var token = jwtTokenGenerator.GenerateToken(id, firstName, lastName);
+        var token = jwtTokenGenerator.GenerateToken(user);
 
         return new AuthenticationResult()
         {
-            Id = id,
-            FirstName = firstName,
-            LastName = lastName,
-            Email = "test@test.com",
+            User = user,
             Token = token
         };
     }
