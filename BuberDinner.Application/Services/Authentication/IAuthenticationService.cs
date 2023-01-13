@@ -1,4 +1,7 @@
 ﻿
+using BuberDinner.Application.Errors;
+using OneOf;
+
 namespace BuberDinner.Application.Services.Authentication;
 
 // The Contract should not be referenced here because this is core logic.
@@ -7,8 +10,8 @@ namespace BuberDinner.Application.Services.Authentication;
 public interface IAuthenticationService
 {
     // AuthenticationResponse Login(LoginRequest request);
-    AuthenticationResult Register(string firstName, string lastName, string email, string password);
-    AuthenticationResult Login(string email, string password);
+    OneOf<AuthenticationResult, DuplicateEmailError> Register(string firstName, string lastName, string email, string password);
+    OneOf<AuthenticationResult, Exception> Login(string email, string password);
 }
 
 

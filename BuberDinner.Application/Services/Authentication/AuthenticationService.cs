@@ -1,7 +1,9 @@
 ﻿using System;
 using BuberDinner.Application.Common.Interfaces.Authentication;
 using BuberDinner.Application.Common.Interfaces.Persistence;
+using BuberDinner.Application.Errors;
 using BuberDinner.Domain.Entities;
+using OneOf;
 
 namespace BuberDinner.Application.Services.Authentication;
 
@@ -16,7 +18,7 @@ public class AuthenticationService : IAuthenticationService
         this.userRepository = userRepository;
     }
 
-    public AuthenticationResult Login(string email, string password)
+    public OneOf<AuthenticationResult, Exception> Login(string email, string password)
     {
         // Check that the user exists
         var user = userRepository.GetUserByEmail(email);
@@ -42,13 +44,13 @@ public class AuthenticationService : IAuthenticationService
         };
     }
 
-    public AuthenticationResult Register(string firstName, string lastName, string email, string password)
+    public OneOf<AuthenticationResult, DuplicateEmailError> Register(string firstName, string lastName, string email, string password)
     {
         // Check if a user already exists
         var user = userRepository.GetUserByEmail(email);
         if (user is not null)
         {
-            throw new Exception("User with this email already exists.");
+            return new DuplicateEmailError();
         }
 
         // Create a user (generate a unique id)
