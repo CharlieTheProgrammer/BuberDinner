@@ -1,7 +1,5 @@
 using BuberDinner.Api.Errors;
-using BuberDinner.Api.Middleware;
 using BuberDinner.Application;
-using BuberDinner.Application.Services.Authentication;
 using BuberDinner.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -26,8 +24,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
-// app.UseMiddleware<ErrorHandlingMiddleware>();
 
 app.UseExceptionHandler("/error");
 

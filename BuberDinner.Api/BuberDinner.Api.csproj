@@ -20,6 +20,7 @@
     <None Remove="Controllers\" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Common" />
     <Folder Include="Controllers\" />
   </ItemGroup>
 </Project>

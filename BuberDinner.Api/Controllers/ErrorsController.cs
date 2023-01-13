@@ -1,3 +1,4 @@
+using BuberDinner.Application.Common.Errors;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,9 +10,16 @@ public class ErrorsController : ControllerBase
     [Route("/error")]
     public IActionResult Error()
     {
-        // This is only needed if we wanted to get details to add additional logic
-        // Exception? exception = HttpContext.Features.Get<IExceptionHandlerFeature>()?.Error;
+        // This is one way of handling this, but it's not scalable. I would need to always register new error messages here
+        // for all new exceptions.
+        Exception? exception = HttpContext.Features.Get<IExceptionHandlerFeature>()?.Error;
+
+        var (statusCode, message) = exception switch
+        {
+            IServiceException serviceException => ((int)serviceException.StatusCode, serviceException.ErrorMessage),
+            _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
+        };
         
-        return Problem();
+        return Problem(statusCode: statusCode, title: message);
     }
 }
