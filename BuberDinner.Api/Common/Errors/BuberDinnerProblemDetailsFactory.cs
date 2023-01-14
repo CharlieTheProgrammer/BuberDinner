@@ -1,10 +1,11 @@
 using System.Diagnostics;
+using ErrorOr;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 
-namespace BuberDinner.Api.Errors;
+namespace BuberDinner.Api.Common.Errors;
 
 public class BuberDinnerProblemDetailsFactory : ProblemDetailsFactory
 {
@@ -82,10 +83,22 @@ public class BuberDinnerProblemDetailsFactory : ProblemDetailsFactory
         }
 
         var traceId = Activity.Current?.Id ?? httpContext?.TraceIdentifier;
+        
         if (traceId != null)
         {
             problemDetails.Extensions["traceId"] = traceId;
         }
+
+        if (httpContext?.Items[HttpContextItemKeys.Errors] is not null)
+        {
+            List<Error> errors = httpContext.Items[HttpContextItemKeys.Errors] as List<Error>;
+            
+            // Don't add the errors just yet because they don't contain any useful information yet.
+            // problemDetails.Extensions.Add(HttpContextItemKeys.Errors, errors);
+            problemDetails.Extensions.Add(HttpContextItemKeys.ErrorCodes, errors.Select(error => error.Code));
+        }
+        
+        
         // Now I can add additional parameters here
         problemDetails.Extensions["customProperty"] = "Hello World!";
     }

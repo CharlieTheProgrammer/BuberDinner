@@ -1,4 +1,6 @@
 ﻿
+using ErrorOr;
+
 namespace BuberDinner.Application.Services.Authentication;
 
 // The Contract should not be referenced here because this is core logic.
@@ -7,8 +9,8 @@ namespace BuberDinner.Application.Services.Authentication;
 public interface IAuthenticationService
 {
     // AuthenticationResponse Login(LoginRequest request);
-    AuthenticationResult Register(string firstName, string lastName, string email, string password);
-    AuthenticationResult Login(string email, string password);
+    ErrorOr<AuthenticationResult> Register(string firstName, string lastName, string email, string password);
+    ErrorOr<AuthenticationResult> Login(string email, string password);
 }
 
 

@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.Api.Controllers;
 
-[ApiController]
 [Route("auth")]
-public class AuthenticationController : ControllerBase
+public class AuthenticationController : ApiController
 {
     private readonly IAuthenticationService authenticationService;
 
@@ -21,35 +20,47 @@ public class AuthenticationController : ControllerBase
     public IActionResult Register(RegisterRequest request)
     {
         // 2 steps
-        // Get response from service
-        var authResult = authenticationService.Register(
+        // Get response from service, it now has either an error object or the AuthenticationResult from the Auth Service
+        var result = authenticationService.Register(
             request.FirstName,
             request.LastName,
             request.Email,
             request.Password
         );
 
-        // Map services response to http response. (The Laravel equivalent is API resources)
-        var authResponse = new AuthenticationResponse(
-            authResult.User.Id,
-            authResult.User.FirstName,
-            authResult.User.LastName,
-            authResult.User.Email,
-            authResult.Token
-        );
-
-
-        return Ok(authResponse);
+        // Long way. See login for shortcut
+        if (result.IsError)
+        {
+            // Return the error
+            return Problem(result.Errors);
+        }
+        else
+        {
+            var authResult = result.Value;
+            // Map services response to http response. (The Laravel equivalent is API resources)
+            var authResponse = MapAuthResponse(authResult);
+            
+            return Ok(authResponse);
+        }
     }
+
+
 
     [HttpPost("login")]
     public IActionResult Login(LoginRequest request)
     {
         // 2 steps
         // Service call
-        var authResult = authenticationService.Login(request.Email, request.Password);
+        var result = authenticationService.Login(request.Email, request.Password);
 
-        // Map to API response
+        // This works, but only for a single error.
+        return result.Match(
+            authResult => Ok(MapAuthResponse(authResult)),
+            errors => Problem(errors));
+    }
+    
+    private static AuthenticationResponse MapAuthResponse(AuthenticationResult authResult)
+    {
         var authResponse = new AuthenticationResponse(
             authResult.User.Id,
             authResult.User.FirstName,
@@ -57,7 +68,6 @@ public class AuthenticationController : ControllerBase
             authResult.User.Email,
             authResult.Token
         );
-
-        return Ok(authResponse);
+        return authResponse;
     }
 }

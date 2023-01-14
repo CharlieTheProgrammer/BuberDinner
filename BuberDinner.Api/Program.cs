@@ -1,4 +1,4 @@
-using BuberDinner.Api.Errors;
+using BuberDinner.Api.Common.Errors;
 using BuberDinner.Application;
 using BuberDinner.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -23,9 +23,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-
-app.UseExceptionHandler("/error");
 
 app.UseHttpsRedirection();
 
