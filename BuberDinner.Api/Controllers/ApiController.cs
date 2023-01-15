@@ -1,10 +1,12 @@
 using BuberDinner.Api.Common;
 using ErrorOr;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BuberDinner.Api.Controllers;
 
 [ApiController]
+[Authorize]
 public class ApiController : ControllerBase
 {
     // Abstracts error handling in controllers. I don't want to repeat this code in each API function call when
