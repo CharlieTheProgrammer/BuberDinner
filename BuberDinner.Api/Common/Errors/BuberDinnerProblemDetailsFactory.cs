@@ -96,10 +96,30 @@ public class BuberDinnerProblemDetailsFactory : ProblemDetailsFactory
             // Don't add the errors just yet because they don't contain any useful information yet.
             // problemDetails.Extensions.Add(HttpContextItemKeys.Errors, errors);
             problemDetails.Extensions.Add(HttpContextItemKeys.ErrorCodes, errors.Select(error => error.Code));
+            
+            // This assumes there is only 1 error message. However, there are additional scenarios.
+            problemDetails.Detail = errors.FirstOrDefault().Description;
+            
+            // For example, let's assume the following scenario.
+            // I am importing a large CSV. The CSV may contain multiple errors. All errors should be returned
+            // in the response. How can we accomplish this?
+            // This one is tricky because we'd have to break it up into 2 steps.
+            // Step 1 is to validate each row's data attributes.
+            // Step 2 is to validate the business rules. 
+
+            // I think instead of trying to come up with a generic solution, we can come up with a special response
+            // for that API in particular. The reason is that we would need some kind of indexing between the errors
+            // and the rows in the csv anyway. I would return 1 400 generic response + an additional custom mapping for 
+            // validation errors. I would also do the same for a 409 error for the business rules.
+            
+            // Btw, anything that is JSON serializable can be added. This means Lists and Dictionaries.
+            // Dictionaries can also be nested with other values.
+            Dictionary<string, string> multiErrors = new Dictionary<string, string>
+            {
+                { "User.DuplicateEmail", "Email is already in use." },
+                { "User.AnotherOne", "Another detailed error message." }
+            };
+            problemDetails.Extensions.Add("customErrors", multiErrors);
         }
-        
-        
-        // Now I can add additional parameters here
-        problemDetails.Extensions["customProperty"] = "Hello World!";
     }
 }
