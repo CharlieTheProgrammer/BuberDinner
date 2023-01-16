@@ -11,51 +11,39 @@ namespace BuberDinner.Api.Controllers;
 [Authorize]
 public class ApiController : ControllerBase
 {
-    // Abstracts error handling in controllers. I don't want to repeat this code in each API function call when
-    // there is an error.
+    // Abstracts error handling in controllers.
+    // I don't want to repeat this code in each API function call when there is an error.
     protected IActionResult Problem(List<Error> errors)
     {
-        
-        // This needs to be refactored to handle different types of errors.
-        
         // Handle validation errors only when NOT using Fluent Validation
-        // if (errors.Any(error => error.Type == ErrorType.Validation))
-        // {
-        //     // Extract all the validation errors and return those only
-        //     var validationErrors = errors.Where(error => error.Type == ErrorType.Validation);
-        //     // This is bad thing about globals. It's not intuitive to remember that setting
-        //     // this here will automagically get picked up by the custom Problem Detail Factory.
-        //     HttpContext.Items[HttpContextItemKeys.Errors] = validationErrors;
-        //     var statusCode = StatusCodes.Status400BadRequest;
-        //     return Problem(statusCode: statusCode);
-        // }
+        if (errors.Any(error => error.Type == ErrorType.Validation))
+        {
+            return HandleValidationProblem(errors);
+        }
         
         // Handle service level errors only.
         if (errors.Any(error => error.Type == ErrorType.Conflict))
         {
-            // Extract all the validation errors and return those only
-            var validationErrors = errors.Where(error => error.Type == ErrorType.Conflict).ToList();
-            // This is bad thing about globals. It's not intuitive to remember that setting
-            // this here will automagically get picked up by the custom Problem Detail Factory.
-            HttpContext.Items[HttpContextItemKeys.Errors] = validationErrors;
-            var statusCode = StatusCodes.Status409Conflict;
-            return Problem(statusCode: statusCode);
+            return HandleConflictProblem(errors);
         }
         
-        
-        // HttpContext.Items[HttpContextItemKeys.Errors] = errors;
-        //
-        // var firstError = errors[0];
-        //
-        // var statusCode = firstError.Type switch
-        // {
-        //     ErrorType.Conflict => StatusCodes.Status409Conflict,
-        //     ErrorType.Validation => StatusCodes.Status400BadRequest,
-        //     ErrorType.NotFound => StatusCodes.Status404NotFound,
-        //     _ => StatusCodes.Status500InternalServerError
-        // };
+        // Handle not found errors (can also be service level errors)
+        if (errors.Any(error => error.Type == ErrorType.NotFound))
+        {
+            return HandleConflictProblem(errors);
+        }
         
         return Problem(statusCode: StatusCodes.Status500InternalServerError); 
+    }
+
+    private IActionResult HandleConflictProblem(List<Error> errors)
+    {
+        // Extract all the validation errors and return those only
+        var validationErrors = errors.Where(error => error.Type == ErrorType.Conflict).ToList();
+        // This is bad thing about globals. It's not intuitive to remember that setting
+        // this here will automagically get picked up by the custom Problem Detail Factory.
+        HttpContext.Items[HttpContextItemKeys.Errors] = validationErrors;
+        return Problem(statusCode: StatusCodes.Status409Conflict);
     }
 
     protected IActionResult ValidationProblem(ValidationResult validationResult)
@@ -71,5 +59,23 @@ public class ApiController : ControllerBase
         }
         
         return ValidationProblem(modelState);
+    }
+    
+    private IActionResult HandleNotFoundProblem(List<Error> errors)
+    {
+        // Extract all the validation errors and return those only
+        var validationErrors = errors.Where(error => error.Type == ErrorType.NotFound).ToList();
+        HttpContext.Items[HttpContextItemKeys.Errors] = validationErrors;
+        return Problem(statusCode: StatusCodes.Status404NotFound);
+    }
+    
+    private IActionResult HandleValidationProblem(List<Error> errors)
+    {
+        // Extract all the validation errors and return those only
+        var validationErrors = errors.Where(error => error.Type == ErrorType.Validation);
+        // This is bad thing about globals. It's not intuitive to remember that setting
+        // this here will automagically get picked up by the custom Problem Detail Factory.
+        HttpContext.Items[HttpContextItemKeys.Errors] = validationErrors;
+        return Problem(statusCode: StatusCodes.Status400BadRequest);
     }
 }
